@@ -6,7 +6,7 @@
     <title>BFlag Converter - Ultra YouTube Video & MP3 Dönüştürücü</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,16 +17,16 @@
 
     <div class="app-wrapper">
         <!-- Top Navigation Bar -->
-        <header class="navbar glass-card">
-            <div class="logo-container">
-                <div class="logo-icon-wrapper">
+        <header class="navbar glass-card" id="mainNavbar">
+            <div class="logo-container" id="brandLogoContainer">
+                <div class="logo-icon-wrapper" id="brandLogoIcon">
                     <svg class="logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l7 4-7 4z" fill="url(#logo-grad)"/>
                         <defs>
                             <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#ff0055"/>
-                                <stop offset="50%" stop-color="#a855f7"/>
-                                <stop offset="100%" stop-color="#06b6d4"/>
+                                <stop offset="0%" stop-color="#3b82f6"/>
+                                <stop offset="50%" stop-color="#2563eb"/>
+                                <stop offset="100%" stop-color="#1d4ed8"/>
                             </linearGradient>
                         </defs>
                     </svg>
@@ -38,7 +38,7 @@
                 </div>
             </div>
 
-            <div class="nav-actions">
+            <div class="nav-actions" id="navActionsContainer">
                 <button class="nav-btn glass-btn" id="btnOpenDownloadsFolder" title="İndirilenler Klasörünü Aç">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -53,34 +53,43 @@
         </header>
 
         <!-- Main Content Area -->
-        <main class="main-content">
+        <main class="main-content" id="mainContentArea">
             <!-- Hero Search & URL Input Section -->
-            <section class="hero-section">
-                <div class="hero-header">
-                    <h1 class="hero-title">YouTube Videolarını <span class="gradient-text">Yüksek Kalitede</span> Dönüştür & İndir</h1>
-                    <p class="hero-subtitle">320kbps MP3 stüdyo sesi veya 4K/1080p kristal netliğinde video indirin. Reklamsız, sınırsız ve anında.</p>
+            <section class="hero-section" id="heroSection">
+                <div class="hero-badge-pill" id="heroBadgePill">
+                    <span class="sparkle-icon">✨</span>
+                    <span>Ultra Hızlı & Reklamsız YouTube Medya Dönüştürücü</span>
                 </div>
 
-                <div class="search-box-wrapper glass-card glowing-border">
+                <div class="hero-header">
+                    <h1 class="hero-title" id="mainHeroTitle">
+                        YouTube Videolarını <span class="gradient-text">Stüdyo Kalitesinde</span> İndirin
+                    </h1>
+                    <p class="hero-subtitle" id="mainHeroSubtitle">
+                        Kristal netliğinde 320kbps MP3 müzik veya 4K/1080p 60fps video formatlarına anında dönüştürün. Otomatik ID3 tag, kapak resmi ve hassas kırpma desteği.
+                    </p>
+                </div>
+
+                <div class="search-box-wrapper glass-card glowing-border" id="searchBoxCard">
                     <div class="search-input-container">
-                        <span class="search-icon">
+                        <span class="search-icon" id="searchBoxIcon">
                             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
                         </span>
-                        <input type="text" id="videoUrlInput" class="search-input" placeholder="YouTube video veya müzik linkini buraya yapıştırın... (Örn: https://www.youtube.com/watch?v=...)" autocomplete="off" spellcheck="false">
+                        <input type="text" id="videoUrlInput" class="search-input" placeholder="YouTube video veya müzik linkini yapıştırın... (Örn: https://www.youtube.com/watch?v=...)" autocomplete="off" spellcheck="false">
                         
                         <div class="input-inline-actions">
                             <button type="button" class="action-tag-btn" id="btnPasteUrl" title="Panodan Yapıştır">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                                     <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                                 </svg>
                                 <span>Yapıştır</span>
                             </button>
-                            <button type="button" class="action-tag-btn" id="btnClearUrl" style="display: none;" title="Temizle">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <button type="button" class="action-tag-btn clear-btn" id="btnClearUrl" style="display: none;" title="Temizle">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                     <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
@@ -101,21 +110,67 @@
                 </div>
 
                 <!-- Quick Examples / Suggestions -->
-                <div class="quick-examples">
-                    <span class="quick-label">⚡ Hızlı Test Linkleri:</span>
-                    <button class="quick-chip" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Rick Astley - Never Gonna Give You Up</button>
-                    <button class="quick-chip" data-url="https://www.youtube.com/watch?v=jfKfPfyJRdk">Lofi Hip Hop Radio</button>
+                <div class="quick-examples-container" id="quickExamplesContainer">
+                    <span class="quick-label">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        Örnek Bağlantılar:
+                    </span>
+                    <div class="quick-chips-list">
+                        <button class="quick-chip" id="chipRickAstley" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                            <span class="chip-icon">🎵</span>
+                            <span>Rick Astley - Never Gonna Give You Up</span>
+                            <span class="chip-tag">4K / 320k</span>
+                        </button>
+                        <button class="quick-chip" id="chipLofi" data-url="https://www.youtube.com/watch?v=jfKfPfyJRdk">
+                            <span class="chip-icon">☕</span>
+                            <span>Lofi Hip Hop Radio - Beats to Relax</span>
+                            <span class="chip-tag">Chill</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Feature Highlights Strip -->
+                <div class="features-strip" id="featuresStrip">
+                    <div class="feature-item" id="featureItemMp3">
+                        <div class="feature-icon-box">🎧</div>
+                        <div class="feature-text">
+                            <strong>320 kbps MP3</strong>
+                            <span>Kayıpsız Stüdyo Sesi</span>
+                        </div>
+                    </div>
+                    <div class="feature-item" id="featureItem4k">
+                        <div class="feature-icon-box">🎬</div>
+                        <div class="feature-text">
+                            <strong>4K / 1080p 60fps</strong>
+                            <span>Maksimum Video Netliği</span>
+                        </div>
+                    </div>
+                    <div class="feature-item" id="featureItemTrim">
+                        <div class="feature-icon-box">✂️</div>
+                        <div class="feature-text">
+                            <strong>Hassas Kırpma</strong>
+                            <span>İstenen Bölümü Kes & Al</span>
+                        </div>
+                    </div>
+                    <div class="feature-item" id="featureItemId3">
+                        <div class="feature-icon-box">🏷️</div>
+                        <div class="feature-text">
+                            <strong>Otomatik ID3 & Kapak</strong>
+                            <span>Albüm Bilgileri Gömülü</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Video Preview & Conversion Dashboard (Dynamically Shown) -->
-            <section class="preview-section glass-card" id="previewSection" style="display: none;">
+            <section class="preview-section glass-card glowing-border" id="previewSection" style="display: none;">
                 <div class="preview-layout">
                     <!-- Left: Media Thumbnail & Info -->
-                    <div class="video-media-card">
-                        <div class="thumbnail-wrapper">
+                    <div class="video-media-card" id="videoMediaCard">
+                        <div class="thumbnail-wrapper" id="thumbnailWrapper">
                             <img id="videoThumb" src="" alt="Video Thumbnail" class="video-thumb-img">
                             <div class="thumb-duration-badge" id="videoDuration">00:00</div>
+                            <div class="thumb-hd-badge">HD / 4K</div>
                             <button class="play-overlay-btn" id="btnPreviewPlay" title="Önizlemeyi Başlat">
                                 <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -123,14 +178,15 @@
                             </button>
                         </div>
                         
-                        <div class="video-meta-box">
+                        <div class="video-meta-box" id="videoMetaBox">
                             <h2 class="video-title" id="videoTitle">Video Başlığı Yükleniyor...</h2>
                             <div class="video-tags-row">
-                                <span class="meta-tag channel-tag">
+                                <span class="meta-tag channel-tag" id="videoChannelTag">
                                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                     <span id="videoChannel">Kanal</span>
+                                    <svg class="verified-icon" viewBox="0 0 24 24" width="13" height="13" fill="#38bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                                 </span>
-                                <span class="meta-tag views-tag">
+                                <span class="meta-tag views-tag" id="videoViewsTag">
                                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                     <span id="videoViews">0 İzlenme</span>
                                 </span>
@@ -144,24 +200,24 @@
                     </div>
 
                     <!-- Right: Conversion Mode & Quality Selector -->
-                    <div class="converter-controls">
+                    <div class="converter-controls" id="converterControls">
                         <!-- Mode Tabs -->
-                        <div class="mode-tabs-wrapper">
-                            <button class="mode-tab active" data-tab="audio">
+                        <div class="mode-tabs-wrapper" id="modeTabsWrapper">
+                            <button class="mode-tab active" id="tabModeAudio" data-tab="audio">
                                 <span class="tab-icon">🎵</span>
                                 <div class="tab-info">
                                     <span class="tab-title">MP3 / Ses İndir</span>
                                     <span class="tab-desc">320kbps HD Müzik</span>
                                 </div>
                             </button>
-                            <button class="mode-tab" data-tab="video">
+                            <button class="mode-tab" id="tabModeVideo" data-tab="video">
                                 <span class="tab-icon">🎬</span>
                                 <div class="tab-info">
                                     <span class="tab-title">MP4 / Video İndir</span>
                                     <span class="tab-desc">4K & 1080p 60fps</span>
                                 </div>
                             </button>
-                            <button class="mode-tab" data-tab="trim">
+                            <button class="mode-tab" id="tabModeTrim" data-tab="trim">
                                 <span class="tab-icon">✂️</span>
                                 <div class="tab-info">
                                     <span class="tab-title">Kırp & Kes</span>
@@ -173,33 +229,36 @@
                         <!-- Audio Options Tab Panel -->
                         <div class="tab-panel active" id="audioTabPanel">
                             <div class="control-group">
-                                <label class="control-label">
-                                    <span>Ses Kalitesi Seçin:</span>
-                                    <span class="badge-recommended">Önerilen: 320 kbps</span>
-                                </label>
+                                <div class="control-header">
+                                    <label class="control-label">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                                        <span>Ses Kalitesi Seçin:</span>
+                                    </label>
+                                    <span class="badge-recommended">Önerilen: 320 kbps Stüdyo</span>
+                                </div>
                                 <div class="quality-grid" id="audioQualityGrid">
-                                    <div class="quality-card active" data-quality="320" data-format="mp3">
+                                    <div class="quality-card active" id="qualityAudio320" data-quality="320" data-format="mp3">
                                         <div class="card-radio"></div>
                                         <div class="card-content">
                                             <div class="card-title">320 kbps <span class="quality-badge ultra">Stüdyo Kalite</span></div>
                                             <div class="card-subtitle">MP3 formatında kristal netliğinde maksimum ses</div>
                                         </div>
                                     </div>
-                                    <div class="quality-card" data-quality="256" data-format="mp3">
+                                    <div class="quality-card" id="qualityAudio256" data-quality="256" data-format="mp3">
                                         <div class="card-radio"></div>
                                         <div class="card-content">
                                             <div class="card-title">256 kbps <span class="quality-badge high">Yüksek Kalite</span></div>
                                             <div class="card-subtitle">Apple Müzik kalitesinde dengeli boyut</div>
                                         </div>
                                     </div>
-                                    <div class="quality-card" data-quality="192" data-format="mp3">
+                                    <div class="quality-card" id="qualityAudio192" data-quality="192" data-format="mp3">
                                         <div class="card-radio"></div>
                                         <div class="card-content">
                                             <div class="card-title">192 kbps <span class="quality-badge standard">Standart</span></div>
                                             <div class="card-subtitle">Standart radyo ve kulaklık için ideal</div>
                                         </div>
                                     </div>
-                                    <div class="quality-card" data-quality="128" data-format="mp3">
+                                    <div class="quality-card" id="qualityAudio128" data-quality="128" data-format="mp3">
                                         <div class="card-radio"></div>
                                         <div class="card-content">
                                             <div class="card-title">128 kbps <span class="quality-badge fast">Hızlı & Hafif</span></div>
@@ -209,31 +268,38 @@
                                 </div>
                             </div>
 
-                            <div class="format-chips-row">
+                            <div class="format-chips-row" id="audioFormatChipsRow">
                                 <span class="chips-label">Ek Formatlar:</span>
-                                <button class="format-chip" data-ext="m4a" data-quality="best">M4A (AAC)</button>
-                                <button class="format-chip" data-ext="wav" data-quality="wav">WAV (Kayıpsız)</button>
-                                <button class="format-chip" data-ext="flac" data-quality="flac">FLAC (Hi-Fi)</button>
+                                <div class="format-chips-list">
+                                    <button class="format-chip" id="chipAudioM4a" data-ext="m4a" data-quality="best">M4A (AAC)</button>
+                                    <button class="format-chip" id="chipAudioWav" data-ext="wav" data-quality="wav">WAV (Kayıpsız)</button>
+                                    <button class="format-chip" id="chipAudioFlac" data-ext="flac" data-quality="flac">FLAC (Hi-Fi)</button>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Video Options Tab Panel -->
                         <div class="tab-panel" id="videoTabPanel" style="display: none;">
                             <div class="control-group">
-                                <label class="control-label">
-                                    <span>Video Çözünürlüğü:</span>
+                                <div class="control-header">
+                                    <label class="control-label">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+                                        <span>Video Çözünürlüğü:</span>
+                                    </label>
                                     <span class="badge-recommended" id="bestVideoBadge">Orijinal En Yüksek</span>
-                                </label>
+                                </div>
                                 <div class="quality-grid" id="videoQualityGrid">
                                     <!-- Populated dynamically with all available resolutions -->
                                 </div>
                             </div>
 
-                            <div class="format-chips-row">
+                            <div class="format-chips-row" id="videoFormatChipsRow">
                                 <span class="chips-label">Video Konteyneri:</span>
-                                <button class="format-chip active" data-ext="mp4">MP4 (Tüm Cihazlar)</button>
-                                <button class="format-chip" data-ext="mkv">MKV (Matroska)</button>
-                                <button class="format-chip" data-ext="webm">WebM</button>
+                                <div class="format-chips-list">
+                                    <button class="format-chip active" id="chipVideoMp4" data-ext="mp4">MP4 (Tüm Cihazlar)</button>
+                                    <button class="format-chip" id="chipVideoMkv" data-ext="mkv">MKV (Matroska)</button>
+                                    <button class="format-chip" id="chipVideoWebm" data-ext="webm">WebM</button>
+                                </div>
                             </div>
                         </div>
 
@@ -241,10 +307,13 @@
                         <div class="tab-panel" id="trimTabPanel" style="display: none;">
                             <!-- Trim Mode Type (Audio vs Video) -->
                             <div class="control-group">
-                                <label class="control-label">
-                                    <span>Kırpma Çıktı Türü:</span>
+                                <div class="control-header">
+                                    <label class="control-label">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+                                        <span>Kırpma Çıktı Türü:</span>
+                                    </label>
                                     <span class="badge-recommended">Ses veya Video Seçin</span>
-                                </label>
+                                </div>
                                 <div class="trim-type-selector">
                                     <button type="button" class="trim-type-btn active" id="btnTrimTypeAudio" data-trim-type="audio">
                                         <span class="trim-type-icon">🎵</span>
@@ -263,31 +332,60 @@
                                 </div>
                             </div>
 
-                            <div class="trim-box glass-inset">
+                            <div class="trim-box glass-inset" id="trimBoxControls">
                                 <div class="trim-header">
-                                    <span>✂️ İndirmek İstediğiniz Zaman Aralığını Belirleyin</span>
+                                    <span class="trim-header-title">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                        İndirmek İstediğiniz Zaman Aralığını Belirleyin
+                                    </span>
                                     <span class="trim-duration-indicator" id="trimDurationDisplay">Aralık: 00:00 - 00:00</span>
                                 </div>
+
                                 <div class="trim-inputs-row">
                                     <div class="time-input-field">
-                                        <label>Başlangıç Zamanı:</label>
-                                        <input type="text" id="trimStartInput" class="glass-input-sm" value="00:00" placeholder="00:00 veya sn">
+                                        <label for="trimStartInput">Başlangıç Zamanı:</label>
+                                        <div class="time-input-wrapper">
+                                            <input type="text" id="trimStartInput" class="glass-input-sm" value="00:00" placeholder="00:00 veya sn">
+                                            <div class="time-stepper-btns">
+                                                <button type="button" class="step-btn" id="btnStartStepMinus" title="-5 saniye">-5s</button>
+                                                <button type="button" class="step-btn" id="btnStartStepPlus" title="+5 saniye">+5s</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="trim-divider">➔</div>
+                                    <div class="trim-divider">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                    </div>
                                     <div class="time-input-field">
-                                        <label>Bitiş Zamanı:</label>
-                                        <input type="text" id="trimEndInput" class="glass-input-sm" value="" placeholder="03:30 veya Tamamı">
+                                        <label for="trimEndInput">Bitiş Zamanı:</label>
+                                        <div class="time-input-wrapper">
+                                            <input type="text" id="trimEndInput" class="glass-input-sm" value="" placeholder="03:30 veya Tamamı">
+                                            <div class="time-stepper-btns">
+                                                <button type="button" class="step-btn" id="btnEndStepMinus" title="-5 saniye">-5s</button>
+                                                <button type="button" class="step-btn" id="btnEndStepPlus" title="+5 saniye">+5s</button>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+
+                                <!-- Quick Trim Presets -->
+                                <div class="trim-presets-row" id="trimPresetsRow">
+                                    <span class="preset-label">Hızlı Kesitler:</span>
+                                    <button type="button" class="preset-chip" id="btnPresetFull">Tüm Süre</button>
+                                    <button type="button" class="preset-chip" id="btnPreset30s">İlk 30 Saniye</button>
+                                    <button type="button" class="preset-chip" id="btnPreset60s">İlk 1 Dakika</button>
+                                    <button type="button" class="preset-chip" id="btnPresetChorus">1:00 - 2:00 (Nakarat)</button>
                                 </div>
                                 <p class="trim-hint">💡 İpucu: Süreleri <strong>01:30</strong> (dakika:saniye) veya doğrudan <strong>90</strong> (saniye) şeklinde girebilirsiniz.</p>
                             </div>
 
                             <!-- Quality selector inside Trim -->
                             <div class="control-group" id="trimQualityContainer">
-                                <label class="control-label">
-                                    <span id="trimQualityLabel">Ses Kalitesi:</span>
+                                <div class="control-header">
+                                    <label class="control-label">
+                                        <span id="trimQualityLabel">Ses Kalitesi:</span>
+                                    </label>
                                     <span class="badge-recommended" id="trimQualityBadge">320 kbps Stüdyo</span>
-                                </label>
+                                </div>
                                 <div class="quality-grid" id="trimQualityGrid">
                                     <!-- Populated dynamically based on Audio/Video trim mode -->
                                 </div>
@@ -295,8 +393,8 @@
                         </div>
 
                         <!-- Options & Toggles -->
-                        <div class="converter-toggles">
-                            <label class="custom-toggle">
+                        <div class="converter-toggles" id="converterToggles">
+                            <label class="custom-toggle" id="toggleEmbedMetadataLabel">
                                 <input type="checkbox" id="chkEmbedMetadata" checked>
                                 <span class="toggle-slider"></span>
                                 <span class="toggle-label">Şarkı kapağını ve sanatçı/albüm bilgilerini (ID3 Tag) dosyaya göm</span>
@@ -304,7 +402,7 @@
                         </div>
 
                         <!-- Download Action Button -->
-                        <div class="action-footer">
+                        <div class="action-footer" id="actionFooter">
                             <button class="download-execute-btn pulse-glow-btn" id="btnStartDownload">
                                 <div class="btn-shine"></div>
                                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -321,7 +419,7 @@
 
             <!-- Live Progress HUD Modal / Overlay -->
             <div class="progress-modal-overlay" id="progressOverlay" style="display: none;">
-                <div class="progress-modal glass-card glowing-border">
+                <div class="progress-modal glass-card glowing-border" id="progressModalBox">
                     <div class="progress-modal-header">
                         <div class="task-status-badge">
                             <span class="pulse-ring"></span>
@@ -356,21 +454,21 @@
 
                         <!-- Realtime Stats Grid -->
                         <div class="stats-hud-grid">
-                            <div class="stat-card">
+                            <div class="stat-card" id="statCardSpeed">
                                 <div class="stat-icon">⚡</div>
                                 <div class="stat-data">
                                     <span class="stat-label">İndirme Hızı</span>
                                     <span class="stat-val" id="statSpeed">-- MB/s</span>
                                 </div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card" id="statCardEta">
                                 <div class="stat-icon">⏳</div>
                                 <div class="stat-data">
                                     <span class="stat-label">Kalan Süre</span>
                                     <span class="stat-val" id="statEta">--</span>
                                 </div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card" id="statCardSize">
                                 <div class="stat-icon">📦</div>
                                 <div class="stat-data">
                                     <span class="stat-label">Boyut</span>
@@ -399,24 +497,40 @@
             </div>
 
             <!-- Download History & Player Section -->
-            <section class="history-section glass-card">
+            <section class="history-section glass-card" id="historySection">
                 <div class="history-header">
                     <div class="history-title-row">
                         <div class="section-icon">📂</div>
                         <div>
-                            <h2 class="section-heading">İndirilen Dosyalar & Geçmiş</h2>
+                            <h2 class="section-heading" id="historyHeading">İndirilen Dosyalar & Geçmiş</h2>
                             <p class="section-subheading">Daha önce dönüştürdüğünüz tüm video ve şarkılar</p>
                         </div>
                     </div>
-                    <div class="history-controls">
-                        <button class="glass-btn-sm" id="btnRefreshHistory">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                            <span>Yenile</span>
-                        </button>
-                        <button class="glass-btn-sm primary-tint" id="btnOpenHistoryFolder">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                            <span>Klasörü Aç</span>
-                        </button>
+
+                    <div class="history-actions-bar">
+                        <!-- History Search & Filter -->
+                        <div class="history-search-box">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="historySearchInput" placeholder="Geçmişte ara..." autocomplete="off">
+                        </div>
+
+                        <!-- Filter Chips -->
+                        <div class="history-filter-chips">
+                            <button type="button" class="hist-filter-chip active" data-filter="all" id="filterAll">Tümü</button>
+                            <button type="button" class="hist-filter-chip" data-filter="audio" id="filterAudio">Ses</button>
+                            <button type="button" class="hist-filter-chip" data-filter="video" id="filterVideo">Video</button>
+                        </div>
+
+                        <div class="history-controls">
+                            <button class="glass-btn-sm" id="btnRefreshHistory" title="Listeyi Güncelle">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                <span>Yenile</span>
+                            </button>
+                            <button class="glass-btn-sm primary-tint" id="btnOpenHistoryFolder" title="İndirilenler Klasörünü Aç">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                <span>Klasörü Aç</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -432,17 +546,17 @@
         </main>
 
         <!-- App Footer with Copyright -->
-        <footer class="app-footer glass-card">
+        <footer class="app-footer glass-card" id="appFooter">
             <div class="footer-content">
                 <div class="footer-left">
                     <span class="footer-logo">BFlag <span class="gradient-text">Converter</span></span>
                     <span class="footer-desc">Ultra Hızlı YouTube Video & MP3 Dönüştürücü</span>
                 </div>
                 <div class="footer-center">
-                    <span class="copyright-text">Copyright by <strong>Berkcan Bayrak</strong></span>
+                    <span class="copyright-text">Copyright © <strong>Berkcan Bayrak</strong></span>
                 </div>
                 <div class="footer-right">
-                    <span class="badge-dev">⚡ Created with Passion</span>
+                    <span class="badge-dev">⚡ Ultra Performans & FFmpeg Motoru</span>
                 </div>
             </div>
         </footer>
@@ -462,7 +576,7 @@
                     <button class="player-ctrl-btn" id="btnPlayerBack10" title="10 sn Geri">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
                     </button>
-                    <button class="player-play-btn" id="btnPlayerPlayToggle">
+                    <button class="player-play-btn" id="btnPlayerPlayToggle" title="Oynat / Duraklat">
                         <svg id="playIconSvg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         <svg id="pauseIconSvg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
                     </button>

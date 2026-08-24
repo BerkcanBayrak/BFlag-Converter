@@ -15,15 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedVideoQuality = "1080";
     let selectedVideoFormat = "mp4";
     let activePlayerUrl = null;
+    let cachedHistoryFiles = [];
+    let currentHistoryFilter = "all";
 
     // DOM Elements
     const videoUrlInput = document.getElementById("videoUrlInput");
     const btnPasteUrl = document.getElementById("btnPasteUrl");
     const btnClearUrl = document.getElementById("btnClearUrl");
     const btnFetchVideo = document.getElementById("btnFetchVideo");
-    const btnText = btnFetchVideo.querySelector(".btn-text");
-    const btnLoader = btnFetchVideo.querySelector(".btn-loader");
-    const btnArrow = btnFetchVideo.querySelector(".btn-arrow");
+    const btnText = btnFetchVideo?.querySelector(".btn-text");
+    const btnLoader = btnFetchVideo?.querySelector(".btn-loader");
+    const btnArrow = btnFetchVideo?.querySelector(".btn-arrow");
 
     // Preview Elements
     const previewSection = document.getElementById("previewSection");
@@ -57,6 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const trimEndInput = document.getElementById("trimEndInput");
     const trimDurationDisplay = document.getElementById("trimDurationDisplay");
     
+    // Trim Steppers & Presets
+    const btnStartStepMinus = document.getElementById("btnStartStepMinus");
+    const btnStartStepPlus = document.getElementById("btnStartStepPlus");
+    const btnEndStepMinus = document.getElementById("btnEndStepMinus");
+    const btnEndStepPlus = document.getElementById("btnEndStepPlus");
+    const btnPresetFull = document.getElementById("btnPresetFull");
+    const btnPreset30s = document.getElementById("btnPreset30s");
+    const btnPreset60s = document.getElementById("btnPreset60s");
+    const btnPresetChorus = document.getElementById("btnPresetChorus");
+
     const chkEmbedMetadata = document.getElementById("chkEmbedMetadata");
     const btnStartDownload = document.getElementById("btnStartDownload");
     const downloadBtnText = document.getElementById("downloadBtnText");
@@ -84,6 +96,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnRefreshHistory = document.getElementById("btnRefreshHistory");
     const btnOpenHistoryFolder = document.getElementById("btnOpenHistoryFolder");
     const btnOpenDownloadsFolder = document.getElementById("btnOpenDownloadsFolder");
+    const historySearchInput = document.getElementById("historySearchInput");
+    const filterAll = document.getElementById("filterAll");
+    const filterAudio = document.getElementById("filterAudio");
+    const filterVideo = document.getElementById("filterVideo");
 
     // Floating Media Player
     const floatingMediaPlayer = document.getElementById("floatingMediaPlayer");
@@ -109,11 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Utilities & Toast
     // ----------------------------------------------------
     function showToast(message, type = "info") {
+        if (!toastContainer) return;
         const toast = document.createElement("div");
         toast.className = `toast ${type}`;
         
         let icon = "ℹ️";
-        if (type === "success") icon = "✅";
+        if (type === "success") icon = "✨";
         if (type === "error") icon = "❌";
 
         toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
@@ -151,70 +168,83 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------------------------------
     // Input & Quick Actions
     // ----------------------------------------------------
-    videoUrlInput.addEventListener("input", () => {
-        if (videoUrlInput.value.trim().length > 0) {
-            btnClearUrl.style.display = "flex";
-        } else {
-            btnClearUrl.style.display = "none";
+    if (videoUrlInput) {
+        // Check initial input value
+        if (videoUrlInput.value.trim().length > 0 && btnClearUrl) {
+            btnClearUrl.style.display = "inline-flex";
         }
-    });
 
-    btnClearUrl.addEventListener("click", () => {
-        videoUrlInput.value = "";
-        btnClearUrl.style.display = "none";
-        videoUrlInput.focus();
-    });
-
-    btnPasteUrl.addEventListener("click", async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            if (text && text.trim()) {
-                videoUrlInput.value = text.trim();
-                btnClearUrl.style.display = "flex";
-                showToast("Link panodan yapıştırıldı!", "success");
-                fetchVideoInfo();
+        videoUrlInput.addEventListener("input", () => {
+            if (videoUrlInput.value.trim().length > 0) {
+                if (btnClearUrl) btnClearUrl.style.display = "inline-flex";
             } else {
-                showToast("Panoda geçerli bir link bulunamadı.", "error");
+                if (btnClearUrl) btnClearUrl.style.display = "none";
             }
-        } catch (err) {
-            showToast("Pano okuma izni verilmedi. Lütfen Ctrl+V ile yapıştırın.", "info");
-        }
-    });
+        });
+
+        videoUrlInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                fetchVideoInfo();
+            }
+        });
+    }
+
+    if (btnClearUrl) {
+        btnClearUrl.addEventListener("click", () => {
+            videoUrlInput.value = "";
+            btnClearUrl.style.display = "none";
+            videoUrlInput.focus();
+        });
+    }
+
+    if (btnPasteUrl) {
+        btnPasteUrl.addEventListener("click", async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text && text.trim()) {
+                    videoUrlInput.value = text.trim();
+                    if (btnClearUrl) btnClearUrl.style.display = "inline-flex";
+                    showToast("Link panodan yapıştırıldı!", "success");
+                    fetchVideoInfo();
+                } else {
+                    showToast("Panoda geçerli bir link bulunamadı.", "error");
+                }
+            } catch {
+                showToast("Lütfen Ctrl+V ile linki yapıştırın.", "info");
+            }
+        });
+    }
 
     document.querySelectorAll(".quick-chip").forEach(chip => {
         chip.addEventListener("click", () => {
             const url = chip.dataset.url;
-            if (url) {
+            if (url && videoUrlInput) {
                 videoUrlInput.value = url;
-                btnClearUrl.style.display = "flex";
+                if (btnClearUrl) btnClearUrl.style.display = "inline-flex";
                 fetchVideoInfo();
             }
         });
     });
 
-    videoUrlInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            fetchVideoInfo();
-        }
-    });
-
-    btnFetchVideo.addEventListener("click", fetchVideoInfo);
+    if (btnFetchVideo) {
+        btnFetchVideo.addEventListener("click", fetchVideoInfo);
+    }
 
     // ----------------------------------------------------
     // Fetch Video Info API
     // ----------------------------------------------------
     async function fetchVideoInfo() {
-        const url = videoUrlInput.value.trim();
+        const url = videoUrlInput ? videoUrlInput.value.trim() : "";
         if (!url) {
-            showToast("Lütfen önce bir YouTube linki yapıştırın.", "error");
-            videoUrlInput.focus();
+            showToast("Lütfen bir YouTube linki yapıştırın.", "error");
+            if (videoUrlInput) videoUrlInput.focus();
             return;
         }
 
-        btnText.style.display = "none";
-        btnArrow.style.display = "none";
-        btnLoader.style.display = "inline-flex";
-        btnFetchVideo.disabled = true;
+        if (btnText) btnText.style.display = "none";
+        if (btnArrow) btnArrow.style.display = "none";
+        if (btnLoader) btnLoader.style.display = "inline-flex";
+        if (btnFetchVideo) btnFetchVideo.disabled = true;
 
         try {
             const response = await fetch("/api/info", {
@@ -231,82 +261,93 @@ document.addEventListener("DOMContentLoaded", () => {
 
             currentVideoData = data;
             renderVideoPreview(data);
-            showToast("Video analiz edildi!", "success");
+            showToast("Video analiz edildi ve seçenekler yüklendi!", "success");
 
         } catch (error) {
             console.error("Fetch Info Error:", error);
             showToast(error.message, "error");
         } finally {
-            btnText.style.display = "inline";
-            btnArrow.style.display = "inline";
-            btnLoader.style.display = "none";
-            btnFetchVideo.disabled = false;
+            if (btnText) btnText.style.display = "inline";
+            if (btnArrow) btnArrow.style.display = "inline";
+            if (btnLoader) btnLoader.style.display = "none";
+            if (btnFetchVideo) btnFetchVideo.disabled = false;
         }
     }
 
     function renderVideoPreview(data) {
+        if (!previewSection) return;
         previewSection.style.display = "block";
         previewSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
-        videoThumb.src = data.thumbnail || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&auto=format&fit=crop&q=80";
-        videoDuration.textContent = data.duration || "00:00";
-        videoTitle.textContent = data.title || "YouTube Videosu";
-        videoChannel.textContent = data.uploader || "YouTube Kanalı";
-        videoViews.textContent = (data.view_count || "0") + " İzlenme";
+        // Reset previous playing iframe if any
+        if (youtubeIframe) youtubeIframe.src = "";
+        if (iframeContainer) iframeContainer.style.display = "none";
+        const thumbWrap = document.querySelector(".thumbnail-wrapper");
+        if (thumbWrap) thumbWrap.style.display = "block";
 
-        // Setup trim end default
-        trimStartInput.value = "00:00";
-        trimEndInput.value = data.duration || "";
-        trimDurationDisplay.textContent = `Aralık: 00:00 - ${data.duration || '00:00'}`;
+        if (videoThumb) videoThumb.src = data.thumbnail || "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg";
+        if (videoDuration) videoDuration.textContent = data.duration || "00:00";
+        if (videoTitle) videoTitle.textContent = data.title || "YouTube Videosu";
+        if (videoChannel) videoChannel.textContent = data.uploader || "YouTube Kanalı";
+        if (videoViews) videoViews.textContent = (data.view_count || "0") + " İzlenme";
+
+        // Setup trim default inputs
+        if (trimStartInput) trimStartInput.value = "00:00";
+        if (trimEndInput) trimEndInput.value = data.duration || "";
+        if (trimDurationDisplay) {
+            trimDurationDisplay.textContent = `Aralık: 00:00 - ${data.duration || '00:00'}`;
+        }
 
         // Populate Video Quality Grid
-        videoQualityGrid.innerHTML = "";
-        if (data.video_qualities && data.video_qualities.length > 0) {
-            bestVideoBadge.textContent = `Maksimum: ${data.video_qualities[0].label}`;
-            
-            data.video_qualities.forEach((vq, index) => {
-                const card = document.createElement("div");
-                card.className = `quality-card ${index === 0 ? 'active' : ''}`;
-                card.dataset.height = vq.height;
-                card.dataset.format = "mp4";
+        if (videoQualityGrid) {
+            videoQualityGrid.innerHTML = "";
+            if (data.video_qualities && data.video_qualities.length > 0) {
+                if (bestVideoBadge) bestVideoBadge.textContent = `Maksimum: ${data.video_qualities[0].label}`;
+                
+                data.video_qualities.forEach((vq, index) => {
+                    const card = document.createElement("div");
+                    card.className = `quality-card ${index === 0 ? 'active' : ''}`;
+                    card.dataset.height = vq.height;
+                    card.dataset.format = "mp4";
 
-                let badgeClass = "standard";
-                let badgeTxt = `${vq.height}p`;
-                if (vq.height >= 2160) { badgeClass = "ultra"; badgeTxt = "4K UHD"; }
-                else if (vq.height >= 1080) { badgeClass = "high"; badgeTxt = "Full HD"; }
-                else if (vq.height >= 720) { badgeClass = "standard"; badgeTxt = "HD"; }
-                else { badgeClass = "fast"; badgeTxt = "SD"; }
+                    let badgeClass = "standard";
+                    let badgeTxt = `${vq.height}p`;
+                    if (vq.height >= 2160) { badgeClass = "ultra"; badgeTxt = "4K UHD"; }
+                    else if (vq.height >= 1080) { badgeClass = "high"; badgeTxt = "Full HD"; }
+                    else if (vq.height >= 720) { badgeClass = "standard"; badgeTxt = "HD"; }
+                    else { badgeClass = "fast"; badgeTxt = "SD"; }
 
-                card.innerHTML = `
-                    <div class="card-radio"></div>
-                    <div class="card-content">
-                        <div class="card-title">${vq.label} <span class="quality-badge ${badgeClass}">${badgeTxt}</span></div>
-                        <div class="card-subtitle">Tahmini Boyut: ${vq.filesize_str}</div>
-                    </div>
-                `;
+                    card.innerHTML = `
+                        <div class="card-radio"></div>
+                        <div class="card-content">
+                            <div class="card-title">${vq.label} <span class="quality-badge ${badgeClass}">${badgeTxt}</span></div>
+                            <div class="card-subtitle">Tahmini Boyut: ${vq.filesize_str}</div>
+                        </div>
+                    `;
 
-                card.addEventListener("click", () => {
-                    document.querySelectorAll("#videoQualityGrid .quality-card").forEach(c => c.classList.remove("active"));
-                    card.classList.add("active");
-                    selectedVideoQuality = vq.height.toString();
-                    updateDownloadButtonText();
+                    card.addEventListener("click", () => {
+                        document.querySelectorAll("#videoQualityGrid .quality-card").forEach(c => c.classList.remove("active"));
+                        card.classList.add("active");
+                        selectedVideoQuality = vq.height.toString();
+                        updateDownloadButtonText();
+                    });
+
+                    videoQualityGrid.appendChild(card);
                 });
 
-                videoQualityGrid.appendChild(card);
-            });
-
-            selectedVideoQuality = data.video_qualities[0].height.toString();
-        } else {
-            videoQualityGrid.innerHTML = `
-                <div class="quality-card active" data-height="1080">
-                    <div class="card-radio"></div>
-                    <div class="card-content">
-                        <div class="card-title">1080p Full HD <span class="quality-badge high">Full HD</span></div>
-                        <div class="card-subtitle">En yüksek standart kalite</div>
+                selectedVideoQuality = data.video_qualities[0].height.toString();
+            } else {
+                videoQualityGrid.innerHTML = `
+                    <div class="quality-card active" data-height="1080">
+                        <div class="card-radio"></div>
+                        <div class="card-content">
+                            <div class="card-title">1080p Full HD <span class="quality-badge high">Full HD</span></div>
+                            <div class="card-subtitle">En yüksek standart kalite</div>
+                        </div>
                     </div>
-                </div>
-            `;
-            selectedVideoQuality = "1080";
+                `;
+                selectedVideoQuality = "1080";
+            }
         }
 
         renderTrimQualityOptions();
@@ -319,8 +360,8 @@ document.addEventListener("DOMContentLoaded", () => {
         trimQualityGrid.innerHTML = "";
 
         if (selectedTrimType === "audio") {
-            trimQualityLabel.textContent = "Kırpılacak Ses Kalitesi:";
-            trimQualityBadge.textContent = "320 kbps Stüdyo";
+            if (trimQualityLabel) trimQualityLabel.textContent = "Kırpılacak Ses Kalitesi:";
+            if (trimQualityBadge) trimQualityBadge.textContent = "320 kbps Stüdyo";
 
             const audioPresets = [
                 { quality: "320", title: "320 kbps", sub: "Maksimum Kalite MP3", badge: "ultra", bTxt: "Stüdyo" },
@@ -350,8 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         } else {
-            trimQualityLabel.textContent = "Kırpılacak Video Çözünürlüğü:";
-            trimQualityBadge.textContent = "HD / 1080p";
+            if (trimQualityLabel) trimQualityLabel.textContent = "Kırpılacak Video Çözünürlüğü:";
+            if (trimQualityBadge) trimQualityBadge.textContent = "HD / 1080p";
 
             if (currentVideoData && currentVideoData.video_qualities && currentVideoData.video_qualities.length > 0) {
                 currentVideoData.video_qualities.forEach((vq, index) => {
@@ -399,12 +440,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Preview play iframe toggle
-    btnPreviewPlay.addEventListener("click", () => {
-        if (!currentVideoData || !currentVideoData.id) return;
-        youtubeIframe.src = `https://www.youtube.com/embed/${currentVideoData.id}?autoplay=1`;
-        iframeContainer.style.display = "block";
-        document.querySelector(".thumbnail-wrapper").style.display = "none";
-    });
+    if (btnPreviewPlay) {
+        btnPreviewPlay.addEventListener("click", () => {
+            if (!currentVideoData || !currentVideoData.id) return;
+            if (youtubeIframe) youtubeIframe.src = `https://www.youtube.com/embed/${currentVideoData.id}?autoplay=1`;
+            if (iframeContainer) iframeContainer.style.display = "block";
+            const thumbWrap = document.querySelector(".thumbnail-wrapper");
+            if (thumbWrap) thumbWrap.style.display = "none";
+        });
+    }
 
     // ----------------------------------------------------
     // Tab Navigation & Quality Selection
@@ -415,15 +459,15 @@ document.addEventListener("DOMContentLoaded", () => {
             tab.classList.add("active");
             selectedMode = tab.dataset.tab;
 
-            audioTabPanel.style.display = "none";
-            videoTabPanel.style.display = "none";
-            trimTabPanel.style.display = "none";
+            if (audioTabPanel) audioTabPanel.style.display = "none";
+            if (videoTabPanel) videoTabPanel.style.display = "none";
+            if (trimTabPanel) trimTabPanel.style.display = "none";
 
-            if (selectedMode === "audio") {
+            if (selectedMode === "audio" && audioTabPanel) {
                 audioTabPanel.style.display = "flex";
-            } else if (selectedMode === "video") {
+            } else if (selectedMode === "video" && videoTabPanel) {
                 videoTabPanel.style.display = "flex";
-            } else if (selectedMode === "trim") {
+            } else if (selectedMode === "trim" && trimTabPanel) {
                 trimTabPanel.style.display = "flex";
                 renderTrimQualityOptions();
             }
@@ -433,21 +477,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Trim Type Buttons (Audio vs Video switch inside Trim)
-    btnTrimTypeAudio.addEventListener("click", () => {
-        btnTrimTypeAudio.classList.add("active");
-        btnTrimTypeVideo.classList.remove("active");
-        selectedTrimType = "audio";
-        renderTrimQualityOptions();
-        updateDownloadButtonText();
-    });
+    if (btnTrimTypeAudio && btnTrimTypeVideo) {
+        btnTrimTypeAudio.addEventListener("click", () => {
+            btnTrimTypeAudio.classList.add("active");
+            btnTrimTypeVideo.classList.remove("active");
+            selectedTrimType = "audio";
+            renderTrimQualityOptions();
+            updateDownloadButtonText();
+        });
 
-    btnTrimTypeVideo.addEventListener("click", () => {
-        btnTrimTypeVideo.classList.add("active");
-        btnTrimTypeAudio.classList.remove("active");
-        selectedTrimType = "video";
-        renderTrimQualityOptions();
-        updateDownloadButtonText();
-    });
+        btnTrimTypeVideo.addEventListener("click", () => {
+            btnTrimTypeVideo.classList.add("active");
+            btnTrimTypeAudio.classList.remove("active");
+            selectedTrimType = "video";
+            renderTrimQualityOptions();
+            updateDownloadButtonText();
+        });
+    }
 
     // Audio Quality Cards
     audioQualityCards.forEach(card => {
@@ -483,17 +529,71 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Trim inputs watcher
-    [trimStartInput, trimEndInput].forEach(inp => {
-        inp.addEventListener("input", () => {
-            const startSec = timeToSeconds(trimStartInput.value) || 0;
-            const endSec = timeToSeconds(trimEndInput.value);
+    // Trim Inputs Watcher & Steppers
+    function updateTrimDisplay() {
+        const startSec = timeToSeconds(trimStartInput.value) || 0;
+        const endSec = timeToSeconds(trimEndInput.value);
+        if (trimDurationDisplay) {
             trimDurationDisplay.textContent = `Aralık: ${formatSecToMinSec(startSec)} - ${endSec ? formatSecToMinSec(endSec) : 'Bitiş'}`;
-            updateDownloadButtonText();
+        }
+        updateDownloadButtonText();
+    }
+
+    if (trimStartInput) trimStartInput.addEventListener("input", updateTrimDisplay);
+    if (trimEndInput) trimEndInput.addEventListener("input", updateTrimDisplay);
+
+    function adjustTimeInput(inputElement, delta) {
+        if (!inputElement) return;
+        let currentSec = timeToSeconds(inputElement.value) || 0;
+        currentSec = Math.max(0, currentSec + delta);
+        inputElement.value = formatSecToMinSec(currentSec);
+        updateTrimDisplay();
+    }
+
+    if (btnStartStepMinus) btnStartStepMinus.addEventListener("click", () => adjustTimeInput(trimStartInput, -5));
+    if (btnStartStepPlus) btnStartStepPlus.addEventListener("click", () => adjustTimeInput(trimStartInput, +5));
+    if (btnEndStepMinus) btnEndStepMinus.addEventListener("click", () => adjustTimeInput(trimEndInput, -5));
+    if (btnEndStepPlus) btnEndStepPlus.addEventListener("click", () => adjustTimeInput(trimEndInput, +5));
+
+    // Trim Presets
+    if (btnPresetFull) {
+        btnPresetFull.addEventListener("click", () => {
+            if (trimStartInput) trimStartInput.value = "00:00";
+            if (trimEndInput) trimEndInput.value = currentVideoData?.duration || "";
+            updateTrimDisplay();
+            showToast("Tüm süre seçildi.", "info");
         });
-    });
+    }
+
+    if (btnPreset30s) {
+        btnPreset30s.addEventListener("click", () => {
+            if (trimStartInput) trimStartInput.value = "00:00";
+            if (trimEndInput) trimEndInput.value = "00:30";
+            updateTrimDisplay();
+            showToast("İlk 30 saniye seçildi.", "info");
+        });
+    }
+
+    if (btnPreset60s) {
+        btnPreset60s.addEventListener("click", () => {
+            if (trimStartInput) trimStartInput.value = "00:00";
+            if (trimEndInput) trimEndInput.value = "01:00";
+            updateTrimDisplay();
+            showToast("İlk 1 dakika seçildi.", "info");
+        });
+    }
+
+    if (btnPresetChorus) {
+        btnPresetChorus.addEventListener("click", () => {
+            if (trimStartInput) trimStartInput.value = "01:00";
+            if (trimEndInput) trimEndInput.value = "02:00";
+            updateTrimDisplay();
+            showToast("1:00 - 2:00 arası seçildi.", "info");
+        });
+    }
 
     function updateDownloadButtonText() {
+        if (!downloadBtnText) return;
         if (selectedMode === "audio") {
             const qualStr = selectedAudioQuality === "best" ? "" : `${selectedAudioQuality}kbps`;
             downloadBtnText.textContent = `${selectedAudioFormat.toUpperCase()} ${qualStr} Ses Olarak İndir`;
@@ -516,7 +616,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------------------------------
     // Download Execution & SSE Stream
     // ----------------------------------------------------
-    btnStartDownload.addEventListener("click", startConversion);
+    if (btnStartDownload) {
+        btnStartDownload.addEventListener("click", startConversion);
+    }
 
     async function startConversion() {
         if (!currentVideoData) {
@@ -524,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const url = videoUrlInput.value.trim();
+        const url = videoUrlInput ? videoUrlInput.value.trim() : "";
         let dlType = "audio";
         let quality = "320";
         let fmt = "mp3";
@@ -545,9 +647,14 @@ document.addEventListener("DOMContentLoaded", () => {
             fmt = (selectedTrimType === "audio") ? selectedAudioFormat : selectedVideoFormat;
             cropStart = timeToSeconds(trimStartInput.value);
             cropEnd = timeToSeconds(trimEndInput.value);
+
+            if (cropStart !== null && cropEnd !== null && cropStart >= cropEnd) {
+                showToast("Başlangıç zamanı bitiş zamanından küçük olmalıdır!", "error");
+                return;
+            }
         }
 
-        const embedThumb = chkEmbedMetadata.checked;
+        const embedThumb = chkEmbedMetadata ? chkEmbedMetadata.checked : true;
 
         // Show Progress Modal
         openProgressModal(dlType, quality, fmt, cropStart, cropEnd);
@@ -583,23 +690,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function openProgressModal(type, quality, fmt, cropStart, cropEnd) {
+        if (!progressOverlay) return;
         progressOverlay.style.display = "flex";
-        completedActionsRow.style.display = "none";
+        if (completedActionsRow) completedActionsRow.style.display = "none";
         
-        progressStatusTitle.textContent = cropStart !== null || cropEnd !== null ? "Kırpma & Dönüştürme İşleniyor..." : "Dönüştürme İşleniyor...";
-        progressThumb.src = currentVideoData.thumbnail || "";
-        progressItemTitle.textContent = currentVideoData.title || "YouTube Dosyası";
+        if (progressStatusTitle) {
+            progressStatusTitle.textContent = cropStart !== null || cropEnd !== null ? "Kırpma & Dönüştürme İşleniyor..." : "Dönüştürme İşleniyor...";
+        }
+        if (progressThumb) progressThumb.src = currentVideoData?.thumbnail || "";
+        if (progressItemTitle) progressItemTitle.textContent = currentVideoData?.title || "YouTube Dosyası";
         
         const typeLabel = type === "audio" ? "Ses (MP3/M4A)" : "Video (MP4/MKV)";
         const trimTag = (cropStart !== null || cropEnd !== null) ? " • ✂️ Kırpılmış Kesit" : "";
-        progressItemFormat.textContent = `${typeLabel} • ${fmt.toUpperCase()} ${quality ? quality + (type === 'audio' ? 'kbps' : 'p') : ''}${trimTag}`;
+        if (progressItemFormat) {
+            progressItemFormat.textContent = `${typeLabel} • ${fmt.toUpperCase()} ${quality ? quality + (type === 'audio' ? 'kbps' : 'p') : ''}${trimTag}`;
+        }
         
-        progressBarFill.style.width = "0%";
-        progressPercent.textContent = "0%";
-        progressStatusMsg.textContent = "Sunucu hazırlanıyor...";
-        statSpeed.textContent = "Hesaplanıyor...";
-        statEta.textContent = "Hesaplanıyor...";
-        statSize.textContent = "0 / 0 MB";
+        if (progressBarFill) progressBarFill.style.width = "0%";
+        if (progressPercent) progressPercent.textContent = "0%";
+        if (progressStatusMsg) progressStatusMsg.textContent = "Sunucu hazırlanıyor...";
+        if (statSpeed) statSpeed.textContent = "Hesaplanıyor...";
+        if (statEta) statEta.textContent = "Hesaplanıyor...";
+        if (statSize) statSize.textContent = "0 / 0 MB";
     }
 
     function closeProgressModal() {
@@ -607,10 +719,32 @@ document.addEventListener("DOMContentLoaded", () => {
             eventSource.close();
             eventSource = null;
         }
-        progressOverlay.style.display = "none";
+        if (progressOverlay) progressOverlay.style.display = "none";
     }
 
-    btnCloseProgressModal.addEventListener("click", closeProgressModal);
+    if (btnCloseProgressModal) {
+        btnCloseProgressModal.addEventListener("click", closeProgressModal);
+    }
+
+    if (progressOverlay) {
+        progressOverlay.addEventListener("click", (e) => {
+            if (e.target === progressOverlay) {
+                closeProgressModal();
+            }
+        });
+    }
+
+    // Global keyboard shortcuts (Escape to close modals)
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            if (progressOverlay && progressOverlay.style.display !== "none") {
+                closeProgressModal();
+            } else if (floatingMediaPlayer && floatingMediaPlayer.style.display !== "none") {
+                if (globalAudioElement) globalAudioElement.pause();
+                floatingMediaPlayer.style.display = "none";
+            }
+        }
+    });
 
     function listenToProgress(taskId) {
         if (eventSource) {
@@ -625,36 +759,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (data.error) {
                     showToast(data.error, "error");
-                    progressStatusMsg.textContent = `Hata: ${data.error}`;
+                    if (progressStatusMsg) progressStatusMsg.textContent = `Hata: ${data.error}`;
                     eventSource.close();
                     return;
                 }
 
                 // Update UI with stream data
                 const percent = Math.min(100, Math.max(0, data.percent || 0));
-                progressBarFill.style.width = `${percent}%`;
-                progressPercent.textContent = `${percent}%`;
+                if (progressBarFill) progressBarFill.style.width = `${percent}%`;
+                if (progressPercent) progressPercent.textContent = `${percent}%`;
 
-                if (data.message) {
+                if (data.message && progressStatusMsg) {
                     progressStatusMsg.textContent = data.message;
                 }
 
-                if (data.speed_str) statSpeed.textContent = data.speed_str;
-                if (data.eta_str) statEta.textContent = data.eta_str;
-                if (data.downloaded_str && data.total_str) {
+                if (data.speed_str && statSpeed) statSpeed.textContent = data.speed_str;
+                if (data.eta_str && statEta) statEta.textContent = data.eta_str;
+                if (data.downloaded_str && data.total_str && statSize) {
                     statSize.textContent = `${data.downloaded_str} / ${data.total_str}`;
                 }
 
                 // State handling
                 if (data.status === "converting") {
-                    progressStatusTitle.textContent = "FFmpeg ile İşleniyor & Kesiliyor...";
+                    if (progressStatusTitle) progressStatusTitle.textContent = "FFmpeg ile İşleniyor & Optimize Ediliyor...";
                 } else if (data.status === "completed") {
                     eventSource.close();
                     handleDownloadSuccess(data);
                 } else if (data.status === "error") {
                     eventSource.close();
                     showToast(data.message || "İndirme sırasında hata oluştu.", "error");
-                    progressStatusTitle.textContent = "Hata Oluştu!";
+                    if (progressStatusTitle) progressStatusTitle.textContent = "Hata Oluştu!";
                 }
 
             } catch (err) {
@@ -668,25 +802,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function handleDownloadSuccess(data) {
-        progressStatusTitle.textContent = "🎉 Dönüştürme Başarıyla Tamamlandı!";
-        progressBarFill.style.width = "100%";
-        progressPercent.textContent = "100%";
-        progressStatusMsg.textContent = `Dosya hazır: ${data.filename || ''}`;
+        if (progressStatusTitle) progressStatusTitle.textContent = "✨ Dönüştürme Başarıyla Tamamlandı!";
+        if (progressBarFill) progressBarFill.style.width = "100%";
+        if (progressPercent) progressPercent.textContent = "100%";
+        if (progressStatusMsg) progressStatusMsg.textContent = `Dosya hazır: ${data.filename || ''}`;
         
-        completedActionsRow.style.display = "flex";
+        if (completedActionsRow) completedActionsRow.style.display = "flex";
 
-        if (data.download_url) {
+        if (data.download_url && btnDownloadFinishedFile) {
             btnDownloadFinishedFile.href = `${data.download_url}?download=true`;
             
-            btnPlayFinishedFile.onclick = () => {
-                playMedia(data.download_url, data.filename, data.type === 'audio');
-                closeProgressModal();
-            };
+            if (btnPlayFinishedFile) {
+                btnPlayFinishedFile.onclick = () => {
+                    playMedia(data.download_url, data.filename, data.type === 'audio');
+                    closeProgressModal();
+                };
+            }
         }
 
-        btnOpenFolderFromModal.onclick = openDownloadsFolder;
+        if (btnOpenFolderFromModal) {
+            btnOpenFolderFromModal.onclick = openDownloadsFolder;
+        }
 
-        showToast("Tebrikler! Dosyanız hazır ve indirildi.", "success");
+        showToast("Tebrikler! Dosyanız hazırlandı ve indirildi.", "success");
         loadHistoryFiles();
     }
 
@@ -698,20 +836,54 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch("/api/files");
             const data = await response.json();
 
-            if (data.files && data.files.length > 0) {
-                renderHistoryFiles(data.files);
-            } else {
-                filesListContainer.innerHTML = `
-                    <div class="empty-history-state">
-                        <div class="empty-icon">🎧</div>
-                        <div class="empty-text">Henüz indirilmiş bir dosya bulunmuyor.</div>
-                        <div class="empty-hint">Yukarıdaki arama kutusuna bir YouTube linki yapıştırarak ilk dönüştürmenizi yapın!</div>
-                    </div>
-                `;
-            }
+            cachedHistoryFiles = data.files || [];
+            applyHistoryFilter();
+
         } catch (err) {
             console.error("Failed to load history:", err);
         }
+    }
+
+    function applyHistoryFilter() {
+        if (!filesListContainer) return;
+        
+        const searchQuery = historySearchInput ? historySearchInput.value.toLowerCase().trim() : "";
+        
+        let filtered = cachedHistoryFiles.filter(file => {
+            const matchesSearch = !searchQuery || file.name.toLowerCase().includes(searchQuery);
+            if (!matchesSearch) return false;
+
+            if (currentHistoryFilter === "audio") return file.is_audio;
+            if (currentHistoryFilter === "video") return file.is_video;
+            return true;
+        });
+
+        if (filtered.length > 0) {
+            renderHistoryFiles(filtered);
+        } else {
+            filesListContainer.innerHTML = `
+                <div class="empty-history-state">
+                    <div class="empty-icon">🎧</div>
+                    <div class="empty-text">Eşleşen indirilmiş bir dosya bulunamadı.</div>
+                    <div class="empty-hint">Yukarıdaki arama kutusuna bir YouTube linki yapıştırarak ilk dönüştürmenizi yapın!</div>
+                </div>
+            `;
+        }
+    }
+
+    if (historySearchInput) {
+        historySearchInput.addEventListener("input", applyHistoryFilter);
+    }
+
+    if (filterAll && filterAudio && filterVideo) {
+        [filterAll, filterAudio, filterVideo].forEach(btn => {
+            btn.addEventListener("click", () => {
+                [filterAll, filterAudio, filterVideo].forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                currentHistoryFilter = btn.dataset.filter;
+                applyHistoryFilter();
+            });
+        });
     }
 
     function renderHistoryFiles(files) {
@@ -781,7 +953,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 showToast(data.error || "Dosya silinemedi.", "error");
             }
-        } catch (err) {
+        } catch {
             showToast("Silme işlemi başarısız.", "error");
         }
     }
@@ -795,34 +967,40 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 showToast(data.error || "Klasör açılamadı.", "error");
             }
-        } catch (err) {
+        } catch {
             showToast("Klasör açma isteği başarısız.", "error");
         }
     }
 
-    btnOpenDownloadsFolder.addEventListener("click", openDownloadsFolder);
-    btnOpenHistoryFolder.addEventListener("click", openDownloadsFolder);
-    btnRefreshHistory.addEventListener("click", () => {
-        loadHistoryFiles();
-        showToast("Liste güncellendi.", "info");
-    });
+    if (btnOpenDownloadsFolder) btnOpenDownloadsFolder.addEventListener("click", openDownloadsFolder);
+    if (btnOpenHistoryFolder) btnOpenHistoryFolder.addEventListener("click", openDownloadsFolder);
+    if (btnRefreshHistory) {
+        btnRefreshHistory.addEventListener("click", () => {
+            loadHistoryFiles();
+            showToast("Liste güncellendi.", "info");
+        });
+    }
 
     // ----------------------------------------------------
     // Built-in Floating Mini Player
     // ----------------------------------------------------
     function playMedia(url, filename, isAudio = true) {
         activePlayerUrl = url;
+        if (!floatingMediaPlayer) return;
         floatingMediaPlayer.style.display = "flex";
-        playerTrackTitle.textContent = filename || "Bilinmeyen Parça";
-        playerTrackMeta.textContent = isAudio ? "Ses Dosyası (Yerel)" : "Video Dosyası (Yerel)";
-        playerMediaIcon.textContent = isAudio ? "🎵" : "🎬";
+        if (playerTrackTitle) playerTrackTitle.textContent = filename || "Bilinmeyen Parça";
+        if (playerTrackMeta) playerTrackMeta.textContent = isAudio ? "Ses Dosyası (Yerel)" : "Video Dosyası (Yerel)";
+        if (playerMediaIcon) playerMediaIcon.textContent = isAudio ? "🎵" : "🎬";
 
-        globalAudioElement.src = url;
-        globalAudioElement.play().catch(e => console.log("Autoplay prevent:", e));
-        updatePlayPauseUI(true);
+        if (globalAudioElement) {
+            globalAudioElement.src = url;
+            globalAudioElement.play().catch(e => console.log("Autoplay prevent:", e));
+            updatePlayPauseUI(true);
+        }
     }
 
     function updatePlayPauseUI(isPlaying) {
+        if (!playIconSvg || !pauseIconSvg) return;
         if (isPlaying) {
             playIconSvg.style.display = "none";
             pauseIconSvg.style.display = "block";
@@ -832,49 +1010,79 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    btnPlayerPlayToggle.addEventListener("click", () => {
-        if (globalAudioElement.paused) {
-            globalAudioElement.play();
-            updatePlayPauseUI(true);
-        } else {
-            globalAudioElement.pause();
+    if (btnPlayerPlayToggle && globalAudioElement) {
+        btnPlayerPlayToggle.addEventListener("click", () => {
+            if (globalAudioElement.paused) {
+                globalAudioElement.play();
+                updatePlayPauseUI(true);
+            } else {
+                globalAudioElement.pause();
+                updatePlayPauseUI(false);
+            }
+        });
+    }
+
+    if (globalAudioElement) {
+        globalAudioElement.addEventListener("loadedmetadata", () => {
+            const dur = globalAudioElement.duration || 0;
+            if (dur > 0 && playerTotalTime) {
+                playerTotalTime.textContent = formatSecToMinSec(dur);
+            }
+        });
+
+        globalAudioElement.addEventListener("timeupdate", () => {
+            const cur = globalAudioElement.currentTime || 0;
+            const dur = globalAudioElement.duration || 0;
+            if (playerCurrentTime) playerCurrentTime.textContent = formatSecToMinSec(cur);
+            if (dur > 0) {
+                if (playerTotalTime) playerTotalTime.textContent = formatSecToMinSec(dur);
+                if (playerSeekbar) playerSeekbar.value = (cur / dur) * 100;
+            }
+        });
+
+        globalAudioElement.addEventListener("ended", () => {
             updatePlayPauseUI(false);
-        }
-    });
+        });
 
-    globalAudioElement.addEventListener("timeupdate", () => {
-        const cur = globalAudioElement.currentTime || 0;
-        const dur = globalAudioElement.duration || 0;
-        playerCurrentTime.textContent = formatSecToMinSec(cur);
-        if (dur > 0) {
-            playerTotalTime.textContent = formatSecToMinSec(dur);
-            playerSeekbar.value = (cur / dur) * 100;
-        }
-    });
+        globalAudioElement.addEventListener("error", () => {
+            showToast("Medya dosyası oynatılamadı veya bulunamadı.", "error");
+            updatePlayPauseUI(false);
+        });
+    }
 
-    playerSeekbar.addEventListener("input", () => {
-        const dur = globalAudioElement.duration;
-        if (dur) {
-            globalAudioElement.currentTime = (playerSeekbar.value / 100) * dur;
-        }
-    });
+    if (playerSeekbar && globalAudioElement) {
+        playerSeekbar.addEventListener("input", () => {
+            const dur = globalAudioElement.duration;
+            if (dur) {
+                globalAudioElement.currentTime = (playerSeekbar.value / 100) * dur;
+            }
+        });
+    }
 
-    playerVolume.addEventListener("input", () => {
-        globalAudioElement.volume = parseFloat(playerVolume.value);
-    });
+    if (playerVolume && globalAudioElement) {
+        playerVolume.addEventListener("input", () => {
+            globalAudioElement.volume = parseFloat(playerVolume.value);
+        });
+    }
 
-    btnPlayerBack10.addEventListener("click", () => {
-        globalAudioElement.currentTime = Math.max(0, globalAudioElement.currentTime - 10);
-    });
+    if (btnPlayerBack10 && globalAudioElement) {
+        btnPlayerBack10.addEventListener("click", () => {
+            globalAudioElement.currentTime = Math.max(0, globalAudioElement.currentTime - 10);
+        });
+    }
 
-    btnPlayerFwd10.addEventListener("click", () => {
-        globalAudioElement.currentTime = Math.min(globalAudioElement.duration || 9999, globalAudioElement.currentTime + 10);
-    });
+    if (btnPlayerFwd10 && globalAudioElement) {
+        btnPlayerFwd10.addEventListener("click", () => {
+            globalAudioElement.currentTime = Math.min(globalAudioElement.duration || 9999, globalAudioElement.currentTime + 10);
+        });
+    }
 
-    btnPlayerClose.addEventListener("click", () => {
-        globalAudioElement.pause();
-        floatingMediaPlayer.style.display = "none";
-    });
+    if (btnPlayerClose && globalAudioElement && floatingMediaPlayer) {
+        btnPlayerClose.addEventListener("click", () => {
+            globalAudioElement.pause();
+            floatingMediaPlayer.style.display = "none";
+        });
+    }
 
     // Check system status on boot
     async function checkBackendStatus() {
@@ -882,16 +1090,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch("/api/status");
             const data = await res.json();
             const pill = document.getElementById("backendStatusPill");
-            if (data.ffmpeg_available) {
-                pill.innerHTML = `
-                    <span class="status-dot online"></span>
-                    <span class="status-text">FFmpeg & FFprobe Hazır</span>
-                `;
-            } else {
-                pill.innerHTML = `
-                    <span class="status-dot" style="background:#fbbf24;"></span>
-                    <span class="status-text">FFmpeg Bulunamadı</span>
-                `;
+            if (pill) {
+                if (data.ffmpeg_available) {
+                    pill.innerHTML = `
+                        <span class="status-dot online"></span>
+                        <span class="status-text">Sistem Hazır (FFmpeg Aktif)</span>
+                    `;
+                } else {
+                    pill.innerHTML = `
+                        <span class="status-dot" style="background:#fbbf24;"></span>
+                        <span class="status-text">FFmpeg Bekleniyor</span>
+                    `;
+                }
             }
         } catch (e) {
             console.log("Status check err:", e);

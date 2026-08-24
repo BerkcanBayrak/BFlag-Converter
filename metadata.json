@@ -1,0 +1,6 @@
+{
+  "name": "BFlag Converter",
+  "description": "Ultra YouTube Video & MP3 Dönüştürücü - 320kbps MP3 stüdyo sesi veya 4K/1080p video indirme ve kırpma aracı",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
